@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -15,6 +17,32 @@ type Agency struct{
 	EmployeeCount uint32
 	Region string
 }
+
+const datafile = "./data.json"
+
+func loadAgencies()([]Agency, error){
+	var agencies []Agency
+
+	data, err := os.ReadFile(datafile)
+	if err != nil{
+		
+		if os.IsNotExist(err){
+			return  []Agency{}, nil	
+		}
+		return  nil, err
+	}
+
+	if len(bytes.TrimSpace(data)) > 0 {
+		if err := json.Unmarshal(data, &agencies); err != nil {
+			return nil, err
+		}
+	}
+
+	return agencies, nil
+
+}
+
+
 
 
 func main()  {
