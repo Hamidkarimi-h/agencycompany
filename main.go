@@ -41,8 +41,13 @@ func loadAgencies()([]Agency, error){
 	return agencies, nil
 
 }
-
-
+func saveAgencies(agencies []Agency) error {
+	data, err := json.MarshalIndent(agencies, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(datafile, data, 0644)
+}
 
 
 func main()  {
