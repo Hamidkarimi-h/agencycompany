@@ -170,8 +170,8 @@ func (h *AgencyHandler) Status() {
     fmt.Println("╔═══════════════════════════════════════╗")
     fmt.Println("║          SYSTEM STATUS REPORT         ║")
     fmt.Println("╠═══════════════════════════════════════╣")
-    fmt.Printf(" ║ Total Agencies: %-20d║\n", totalAgencies)
-    fmt.Printf(" ║ Total Employees: %-19d║\n", totalEmployees)
+    fmt.Printf("║ Total Agencies: %-20d  ║\n", totalAgencies)
+    fmt.Printf("║ Total Employees: %-19d  ║\n", totalEmployees)
     fmt.Println("╠═══════════════════════════════════════╣")
     fmt.Println("║ Agencies per Region:                  ║")
 
@@ -180,7 +180,7 @@ func (h *AgencyHandler) Status() {
         if displayRegion == "" {
             displayRegion = "Unknown"
         }
-        fmt.Printf("║   • %-10s: %-17d║\n", displayRegion, count)
+        fmt.Printf("║   • %-10s: %-17d     ║\n", displayRegion, count)
     }
     fmt.Println("╚═══════════════════════════════════════╝")
 }
