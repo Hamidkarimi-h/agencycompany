@@ -87,7 +87,7 @@ func runCommand(command string, region string) {
     case "create":
         CreateAgency(region)
     case "edit":
-        fmt.Println("Edit command not implemented yet.")
+        EditAgency(region)
     case "get":
         GetAgency()
     case "status":
@@ -302,3 +302,142 @@ func GetAgency(){
 	}
 }
 
+func EditAgency(flagRegion string){
+	agencies, err := loadAgencies()
+	if err != nil {
+		fmt.Println("Error loading agencies:", err)
+		
+		return
+	}
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter ID: ") 
+
+	strID, iErr := reader.ReadString('\n')
+	if iErr != nil {
+		fmt.Println("Error reading ID:", iErr)
+		
+		return
+	}
+	strID = strings.TrimSpace(strID)
+	if strID == "" {
+		fmt.Println("ID cannot be empty.")
+		
+		return
+	}
+	u64, err := strconv.ParseUint(strID, 10, 0)
+	if err != nil {
+		fmt.Println("Invalid number format:", err)
+		
+		return
+	}
+
+	ID := uint(u64)
+	found := -1
+
+	for index, agency := range agencies {
+
+		if ID == agency.ID {
+			fmt.Printf("ID: %d\nName: %s\nRegion: %s\nPhone: %s\nAddress: %s\n", 
+    			agency.ID, agency.Name, agency.Region, agency.Phone, agency.Address)
+
+			if agency.EmployeeCount != nil {
+				fmt.Printf("Employee Count: %d\n", *agency.EmployeeCount)
+			} else {
+				fmt.Println("Employee Count: Not specified")
+			}
+			found = index			
+			break 
+		}
+	}
+	if found == -1 {
+    	fmt.Printf("No agency found with ID %d.\n", ID)
+    	return
+	}
+
+
+    fmt.Printf("Enter Agency Name [%s]: ", agencies[found].Name)
+    name, nErr := reader.ReadString('\n')
+    if nErr != nil {
+        fmt.Println("Error reading name:", nErr)
+        
+		return
+    }else{
+		name = strings.TrimSpace(name)
+		if name != ""{
+			agencies[found].Name = name
+		}
+	}
+    
+    fmt.Printf("Enter Agency Phone [%s]: ", agencies[found].Phone)
+    phone, pErr := reader.ReadString('\n')
+    if pErr != nil {
+        fmt.Println("Error reading phone:", pErr)
+        
+		return
+    }else{
+		phone = strings.TrimSpace(phone)
+		if phone != ""{
+			agencies[found].Phone = phone
+		}
+	}
+
+	fmt.Printf("Enter Agency Address [%s]: ", agencies[found].Address)
+    address, aErr := reader.ReadString('\n')
+    if aErr != nil {
+        fmt.Println("Error reading address:", aErr)
+        
+		return
+    }else{
+		address = strings.TrimSpace(address)
+		if address != ""{
+			agencies[found].Address = address
+		}
+	}
+
+
+	if agencies[found].EmployeeCount != nil {
+    	fmt.Printf("Enter Agency Employee [%d]: ", *agencies[found].EmployeeCount)
+	}else {
+		fmt.Print("Enter Agency Employee [Not specified]: ")
+	}
+    empCountStr, eErr := reader.ReadString('\n')
+	if eErr != nil {
+        fmt.Println("Error reading employee count:", eErr)
+        
+		return
+    }else{
+		empCountStr = strings.TrimSpace(empCountStr)
+		
+		if empCountStr != "" {
+		count, _ := strconv.ParseUint(empCountStr, 10, 32)
+		val := uint32(count)
+		agencies[found].EmployeeCount = &val 
+		}
+
+	}
+
+	if flagRegion != "" {
+		agencies[found].Region = flagRegion
+	} else {
+		fmt.Printf("Enter Agency Region [%s]: ", agencies[found].Region)
+		newRegion, rErr := reader.ReadString('\n')
+		if rErr != nil {
+			fmt.Println("Error reading region:", rErr)
+			
+			return
+		}
+		newRegion = strings.TrimSpace(newRegion)
+		if newRegion != "" {
+			agencies[found].Region = newRegion
+		}
+	}
+
+	if err := saveAgencies(agencies); err != nil {
+    	fmt.Println("Error saving agencies:", err)
+    	
+		return
+	}
+	fmt.Printf("Agency '%s' updated successfully.\n", agencies[found].Name)
+
+}
