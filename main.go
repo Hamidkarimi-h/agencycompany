@@ -101,7 +101,7 @@ func runCommand(command string, region string) {
     case "get":
         GetAgency()
     case "status":
-        fmt.Println("Status command not implemented yet.")
+        Status()
 	case "exit":
 		os.Exit(0)
     default:
@@ -449,5 +449,45 @@ func EditAgency(flagRegion string){
 		return
 	}
 	fmt.Printf("Agency '%s' updated successfully.\n", agencies[found].Name)
+
+}
+
+func Status(){
+	agencies, err := loadAgencies()
+	if err != nil{
+		fmt.Println("can't load agencies", err)
+
+		return
+	}
+
+	totalAgencies := len(agencies)
+	if totalAgencies == 0{
+		fmt.Println("System Status: No agencies currently registered.")
+		
+		return
+	}
+
+	var totalEmployees uint32 = 0
+	regionCount := make(map[string]int)
+
+	for _, agency := range agencies{
+		regionCount[agency.Region]++
+
+		if agency.EmployeeCount != nil {
+			totalEmployees += *agency.EmployeeCount
+		}
+	}
+
+	fmt.Println("=== System Status ===")
+	fmt.Printf("Total Agencies: %d\n", totalAgencies)
+	fmt.Printf("Total Employees: %d\n", totalEmployees)
+	fmt.Println("Agencies per Region:")
+	for region, count := range regionCount {
+		displayRegion := region
+		if displayRegion == "" {
+			displayRegion = "Unknown"
+		}
+		fmt.Printf("  - %s: %d\n", displayRegion, count)
+	}
 
 }
