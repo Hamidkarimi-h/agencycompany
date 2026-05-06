@@ -292,7 +292,7 @@ func GetAgency(){
 			} else {
 				fmt.Println("Employee Count: Not specified")
 			}
-						
+			found = true			
 			break 
 		}
 	}
