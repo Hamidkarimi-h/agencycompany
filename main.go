@@ -55,11 +55,13 @@ func saveAgencies(agencies []Agency) error {
 
 func printUsage() {
     fmt.Println("Usage: go run main.go <command> [options]")
-    fmt.Println("Commands: list, get, create, edit, status")
+    fmt.Println("Commands: list, get, create, edit, status, exit")
     fmt.Println("Example: go run main.go list -region=Tehran")
 }
 
 func main()  {
+	fmt.Println(" Welcome to Agency Management CLI!")
+	
 	
 	if len(os.Args) < 2{
 		printUsage()
@@ -77,7 +79,15 @@ func main()  {
 	} else {
 		fmt.Printf("=> Executing command '%s' for ALL regions...\n", command)
 	}
-	runCommand(command, *region)
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for{
+		runCommand(command, *region)
+		
+		fmt.Println("Enter Command:")
+		scanner.Scan()
+		command = scanner.Text()
+	}	
 }
 
 func runCommand(command string, region string) {
