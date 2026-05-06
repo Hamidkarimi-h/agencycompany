@@ -15,7 +15,7 @@ func printUsage() {
     fmt.Println("Usage: go run main.go <command> [options]")
     fmt.Println("Commands: list, get, create, edit, status, exit")
     fmt.Println("Options:")
-    fmt.Println("  -region=<name>  Filter or apply to a specific region")
+    fmt.Println("  -region=<name>  Filter or apply to a specific region (list, create, edit)")
     fmt.Println("Examples:")
     fmt.Println("  go run main.go list")
     fmt.Println("  go run main.go list -region=Tehran")
@@ -39,16 +39,27 @@ func main() {
         os.Exit(0)
     }
 
-    // Parse flags
-    myFlags := flag.NewFlagSet("myFlags", flag.ExitOnError)
-    region := myFlags.String("region", "", "Filter or apply to a specific region")
-    myFlags.Parse(os.Args[2:])
 
-    // Print execution context
-    if *region != "" {
-        fmt.Printf("=> Executing command '%s' for region '%s'...\n", command, *region)
+    var region string
+    commandsWithRegion := map[string]bool{
+        "list":   true,
+        "create": true,
+        "edit":   true,
+    }
+
+    if commandsWithRegion[command] {
+        myFlags := flag.NewFlagSet("myFlags", flag.ExitOnError)
+        regionPtr := myFlags.String("region", "", "Filter or apply to a specific region")
+        myFlags.Parse(os.Args[2:])
+        region = *regionPtr
+
+        if region != "" {
+            fmt.Printf("=> Executing command '%s' for region '%s'...\n", command, region)
+        } else {
+            fmt.Printf("=> Executing command '%s' for ALL regions...\n", command)
+        }
     } else {
-        fmt.Printf("=> Executing command '%s' for ALL regions...\n", command)
+        fmt.Printf("=> Executing command '%s'...\n", command)
     }
 
     // Initialize dependencies
@@ -56,7 +67,13 @@ func main() {
     service := service.NewAgencyService(repo)
     handler := handler.NewAgencyHandler(service)
 
-    // Main interactive loop
+
+    if region != "" {
+        runCommand(command, region, handler)
+        fmt.Println("\n Command executed. Exiting.")
+        return
+    }
+
     scanner := bufio.NewScanner(os.Stdin)
     shouldContinue := true
 
@@ -71,7 +88,17 @@ func main() {
             continue
         }
 
-        shouldContinue = runCommand(command, *region, handler)
+
+        if commandsWithRegion[command] && region == "" {
+            fmt.Print("Enter Region (or press Enter for all): ")
+            if scanner.Scan() {
+                region = strings.TrimSpace(scanner.Text())
+            }
+        }
+
+        shouldContinue = runCommand(command, region, handler)
+
+        region = ""
     }
 
     if err := scanner.Err(); err != nil {
