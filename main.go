@@ -89,7 +89,7 @@ func runCommand(command string, region string) {
     case "edit":
         fmt.Println("Edit command not implemented yet.")
     case "get":
-        fmt.Println("Get command not implemented yet.")
+        GetAgency()
     case "status":
         fmt.Println("Status command not implemented yet.")
 	case "exit":
@@ -247,3 +247,58 @@ func CreateAgency(flagRegion string) {
    
     fmt.Printf("Agency '%s' created successfully with ID %d.\n", newAgency.Name, newAgency.ID)
 }
+
+func GetAgency(){
+	agencies, err := loadAgencies()
+	if err != nil {
+		fmt.Println("Error loading agencies:", err)
+		
+		return
+	}
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter ID: ") 
+
+	strID, iErr := reader.ReadString('\n')
+	if iErr != nil {
+		fmt.Println("Error reading ID:", iErr)
+		
+		return
+	}
+	strID = strings.TrimSpace(strID)
+	if strID == "" {
+		fmt.Println("ID cannot be empty.")
+		
+		return
+	}
+	u64, err := strconv.ParseUint(strID, 10, 0)
+	if err != nil {
+		fmt.Println("Invalid number format:", err)
+		
+		return
+	}
+
+	ID := uint(u64)
+	found := false
+
+	for _, agency := range agencies {
+
+		if ID == agency.ID {
+			fmt.Printf("ID: %d\nName: %s\nRegion: %s\nPhone: %s\nAddress: %s\n", 
+    			agency.ID, agency.Name, agency.Region, agency.Phone, agency.Address)
+
+			if agency.EmployeeCount != nil {
+				fmt.Printf("Employee Count: %d\n", *agency.EmployeeCount)
+			} else {
+				fmt.Println("Employee Count: Not specified")
+			}
+						
+			break 
+		}
+	}
+
+	if !found {
+		fmt.Printf("No agency found with ID %d.\n", ID)
+	}
+}
+
